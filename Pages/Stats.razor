@@ -1,0 +1,64 @@
+﻿@page "/stats"
+@using Blazored.LocalStorage
+@inject ILocalStorageService localStorage
+
+<h3>📊 Dashboard emozionale</h3>
+
+@if (spesePerEmozione != null && spesePerEmozione.Any())
+{
+    <div class="chart-container">
+        @foreach (var item in spesePerEmozione)
+        {
+            <div class="chart-bar-container">
+                <div class="chart-bar" style="width:@(Math.Min(item.Value * 10, 100))%; background-color:@GetEmotionColor(item.Key);" title="@item.Key: @item.Value spese">
+                    <span>@item.Key</span>
+                </div>
+                <p class="spesa-count">@item.Value spese</p>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p>Nessuna spesa registrata.</p>
+}
+
+@code {
+    private Dictionary<string, int> spesePerEmozione;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var spese = await localStorage.GetItemAsync<List<Add.Spesa>>("spese") ?? new List<Add.Spesa>();
+
+        // Raggruppa le spese per emozione
+        spesePerEmozione = spese
+            .Where(s => !string.IsNullOrWhiteSpace(s.Emozione))
+            .GroupBy(s => s.Emozione)
+            .ToDictionary(g => g.Key, g => g.Count());
+    }
+
+    private string GetEmotionColor(string emozione)
+    {
+        switch (emozione)
+        {
+            case "Tristezza":
+                return "#3a86ff"; // Blu
+            case "Ansia":
+                return "#ff4d4d"; // Rosso
+            case "Stress":
+                return "#ffb84d"; // Giallo
+            case "Euforia":
+                return "#66ff66"; // Verde
+            case "Felicità":
+                return "#ffcc00"; // Arancio
+            case "Noia":
+                return "#8080ff"; // Viola
+            case "Frustrazione":
+                return "#ff6666"; // Rosa
+            case "Confusione":
+                return "#b3b3b3"; // Grigio
+            default:
+                return "#cccccc"; // Grigio chiaro per emozioni sconosciute
+        }
+    }
+}

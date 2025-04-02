@@ -1,0 +1,84 @@
+﻿@page "/add"
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+
+<h3>➕ Aggiungi una spesa emotiva</h3>
+
+<input @bind="spesa.Importo" type="number" placeholder="Importo (€)" />
+<select @bind="spesa.Categoria">
+    <option value="">Seleziona categoria</option>
+    @foreach (var categoria in categorie)
+    {
+        <option value="@categoria">@categoria</option>
+    }
+</select>
+
+<select @bind="spesa.Emozione">
+    <option value="">Seleziona emozione</option>
+    @foreach (var emozione in emozioni.Keys)
+    {
+        <option value="@emozione">@emozione</option>
+    }
+</select>
+
+<textarea @bind="spesa.Note" placeholder="Note opzionali" style="vertical-align: middle;" />
+<button @onclick="SalvaSpesa">Salva</button>
+
+
+
+
+@if (!string.IsNullOrEmpty(Suggerimento))
+{
+    <div class="tip-box">
+        <strong>💡 Spunto emotivo:</strong> @Suggerimento
+    </div>
+}
+
+@code {
+    public class Spesa
+    {
+        public string Importo { get; set; } = "";
+        public string Categoria { get; set; } = "";
+        public string Emozione { get; set; } = "";
+        public string Note { get; set; } = "";
+        public DateTime Data { get; set; } = DateTime.Now;
+    }
+
+    private Spesa spesa = new();
+    private string Suggerimento = "";
+
+    private Dictionary<string, List<string>> emozioni = new()
+        {
+            ["Tristezza"] = new() { "Va bene sentirsi giù...", "A volte una tazza di tè...", "Ti meriti attenzione..." },
+            ["Ansia"] = new() { "Respira profondamente...", "L’ansia ama la velocità...", "Molti fanno acquisti per calmarsi..." },
+            ["Stress"] = new() { "Una pausa vera...", "Il tuo corpo ha bisogno...", "EmoTrack è qui per aiutarti..." },
+            ["Euforia"] = new() { "L'entusiasmo è bellissimo...", "Ti senti invincibile?", "Salva questa sensazione..." },
+            ["Felicità"] = new() { "Spendere quando si è felici...", "Hai notato se c’è un pattern?", "Gusta il momento..." },
+            ["Noia"] = new() { "La noia spesso ci spinge...", "Prova a sostituire la spesa con un’azione...", "Dove ti porta se non spendi?" },
+            ["Frustrazione"] = new() { "La rabbia e la frustrazione...", "Scrivi cosa ti ha dato fastidio...", "C’è un modo per sentirti meglio..." },
+            ["Confusione"] = new() { "In momenti di confusione...", "Prova a scrivere tre parole...", "Non prendere decisioni emotive..." }
+        };
+
+    private async Task SalvaSpesa()
+    {
+        if (string.IsNullOrWhiteSpace(spesa.Emozione)) return;
+
+        var key = spesa.Emozione;
+        if (emozioni.ContainsKey(key))
+        {
+            var random = new Random();
+            var lista = emozioni[key];
+            Suggerimento = lista[random.Next(lista.Count)];
+        }
+
+        var speseSalvate = await localStorage.GetItemAsync<List<Spesa>>("spese") ?? new();
+        speseSalvate.Add(spesa);
+        await localStorage.SetItemAsync("spese", speseSalvate);
+
+        spesa = new();
+    }
+    private List<string> categorie = new()
+{
+    "Cibo", "Vestiti", "Tecnologia", "Casa", "Auto", "Viaggi", "Regali",
+    "Salute", "Divertimento", "Abbonamenti", "Altro"
+};
+}

@@ -1,0 +1,28 @@
+﻿@page "/"
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+
+<h3>📜 Diario Spese Emotive</h3>
+
+@if (spese == null || !spese.Any())
+{
+    <p>Nessuna spesa registrata.</p>
+}
+else
+{
+    @foreach (var s in spese.OrderByDescending(x => x.Data))
+    {
+        <div class="entry">
+            <strong>@s.Data.ToShortDateString()</strong> – €@s.Importo – @s.Categoria – <em>@s.Emozione</em>
+            <br />@s.Note
+        </div>
+    }
+}
+
+@code {
+    private List<Add.Spesa> spese = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        spese = await localStorage.GetItemAsync<List<Add.Spesa>>("spese") ?? new();
+    }
+}
