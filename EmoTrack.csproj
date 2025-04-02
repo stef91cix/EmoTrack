@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="index.html" />
+    <None Include="wwwroot\index.html" />
   </ItemGroup>
 
   <ItemGroup>
