@@ -6,7 +6,6 @@ using Blazored.LocalStorage;
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
-
 // Aggiungi il servizio Blazored LocalStorage
 builder.Services.AddBlazoredLocalStorage();
 
